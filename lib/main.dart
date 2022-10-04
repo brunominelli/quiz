@@ -1,58 +1,81 @@
 import 'package:flutter/material.dart';
-import 'package:project_quiz/question.dart';
-import 'package:project_quiz/answer.dart';
+import 'package:project_quiz/quiz.dart';
+import 'package:project_quiz/result.dart';
 
 main() {
-  runApp(const Quiz());
+  runApp(const App());
 }
 
-class Quiz extends StatefulWidget {
-  const Quiz({super.key});
+class App extends StatefulWidget {
+  const App({
+    super.key,
+  });
 
   @override
-  State<Quiz> createState() => _QuizState();
+  State<App> createState() => _AppState();
 }
 
-class _QuizState extends State<Quiz> {
-  int _questionIndex = 0;
-  List<Map<String, Object>> questions = [
+class _AppState extends State<App> {
+  int _index = 0;
+  int _score = 0;
+  final List<Map<String, Object>> _questions = [
     {
       'question': 'Qual é a sua cor favorita?',
-      'answers': ['Ciano', 'Amarelo', 'Magenta', 'Black'],
+      'answers': [
+        {'answer': 'Ciano', 'point': 5},
+        {'answer': 'Amarelo', 'point': 1},
+        {'answer': 'Magenta', 'point': 3},
+        {'answer': 'Black', 'point': 7},
+      ],
     },
     {
       'question': 'Qual é a seu animal favorito?',
-      'answers': ['Águia', 'Lobo', 'Urso', 'Mamute'],
+      'answers': [
+        {'answer': 'Águia', 'point': 1},
+        {'answer': 'Lobo', 'point': 7},
+        {'answer': 'Urso', 'point': 3},
+        {'answer': 'Mamute', 'point': 5},
+      ],
     },
     {
       'question': 'Qual é a seu passatempo favorito?',
-      'answers': ['Jogar', 'Ler', 'Estudar', 'Comer'],
+      'answers': [
+        {'answer': 'Jogar', 'point': 7},
+        {'answer': 'Ler', 'point': 1},
+        {'answer': 'Estudar', 'point': 3},
+        {'answer': 'Comer', 'point': 5},
+      ],
     },
   ];
 
-  void setIndex() {
+  void setAnswer(int point) {
+    if (_index < _questions.length) {
+      setState(() {
+        _index += 1;
+        _score += point;
+      });
+    }
+  }
+
+  void restartQuiz() {
     setState(() {
-      _questionIndex += 1;
+      _index = 0;
+      _score = 0;
     });
   }
 
+  bool get isSelected => _index < _questions.length;
+
   @override
   Widget build(BuildContext context) {
-    List<String> answers = questions[_questionIndex].cast()['answers'];
-
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Quiz'),
         ),
-        body: Column(
-          children: [
-            Question(question: '${questions[_questionIndex]['question']}'),
-            ...answers
-                .map((answer) => Answer(answer: answer, onPressed: setIndex))
-                .toList(),
-          ],
-        ),
+        body: isSelected
+            ? Quiz(questions: _questions, index: _index, setAnswer: setAnswer)
+            : Result(score: _score, restartQuiz: restartQuiz),
       ),
     );
   }
